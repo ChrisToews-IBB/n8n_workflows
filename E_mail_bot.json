@@ -1,0 +1,427 @@
+{
+  "name": "E-mail-bot",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1020,
+        100
+      ],
+      "id": "b594db26-67c7-4ecc-bae9-b8e2d570ba0e",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pzvNbgpyNQ9uSokr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79a9aee2-1b86-456f-9c26-11bd2c387bc0",
+              "name": "Email Context",
+              "value": "=Sender Email Adress:\n{{ $json.from.value[0].address }}\n\nEmail Subject:\n{{ $json.subject }}\n\nEmail Body:\n{{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        100
+      ],
+      "id": "c8dc28ae-0b41-4a45-81bc-7765af593c8a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Your role is to determine if an email is releated to a sponsorship deal or not.\n\nRespond with JSON object with the following fields:\n- isSponsorship: which can be either true or false.\n- reasoning: explain your answer.\n- lead_name: the name of the person as per the email body, leave blank if not a sponsor email.\n- lead_company: the company wanting to sponsor, leave blank if not a sponsor email.\nThink carefully about your answer.\n\n{{ $json['Email Context'] }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -580,
+        100
+      ],
+      "id": "237e7110-df87-4ec0-bcfa-8c5079cf5241",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        280
+      ],
+      "id": "692dbb72-4ead-4148-bcf4-9bdf109a3077",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2eQjV1uq585TWIny",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"isSponsorship\": {\n\t\t\t\"type\": \"boolean\"\n\t\t},\n\t\t\"reasoning\": {\n\t\t\t\"type\": \"string\"\n        },\"lead_name\": {\n          \"type\": \"string\"\n\t\t},\n        \"lead_company\": {\n          \"type\": \"string\"\n        }\n      \n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        320
+      ],
+      "id": "6dd38596-c5b7-4af4-9edf-a7a289c6db56",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0d8cf51-8e7f-4168-a21b-e3d4fafadfe3",
+              "leftValue": "={{ $json.output.isSponsorship }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -220,
+        100
+      ],
+      "id": "9a603050-050b-4bf5-8a03-e4464cf04ba9",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        0,
+        320
+      ],
+      "id": "b46f21ed-403f-4eff-a229-5c0ce9536579",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appplKgWql2T8KC9s",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appplKgWql2T8KC9s"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbloAk6bMfhSeIG4r",
+          "mode": "list",
+          "cachedResultName": "Sponsors",
+          "cachedResultUrl": "https://airtable.com/appplKgWql2T8KC9s/tbloAk6bMfhSeIG4r"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+            "Reasoning": "={{ $json.output.reasoning }}",
+            "Name": "={{ $json.output.lead_name }}",
+            "Company": "={{ $json.output.lead_company }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e7d2d477-f59a-4f4a-a5fc-0621ff3bb5b0",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RcsRp2hYetewbq6q",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You have to act as an \"OpenAI Message Model\"\nYou work for a Youtube channel called CreezeOfficial.\nYour role is to respond to sponsorship opportunities by drafting a response email.\nDon't write \"```html\" anywhere.\n\nCarefully have a look at the below email context and write a friendly and professional email.\nOnly return the body of the email in HTML format. Do not write a header; only the body!\nThe email should include information about sponsorship rates and the terms and conditions.",
+        "options": {
+          "systemMessage": "=EMAIL CONTEXT:\n\n{{ $('Edit Fields').item.json['Email Context'] }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        240,
+        0
+      ],
+      "id": "41e0b749-6aaa-4f9a-aa5b-ca1c7032866f",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        240,
+        160
+      ],
+      "id": "eed6f928-f94b-41b4-9d87-a052c555a078",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2eQjV1uq585TWIny",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: {{ $('Gmail Trigger').item.json.headers.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.output }}",
+        "options": {
+          "threadId": "={{ $('Gmail Trigger').item.json.threadId }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        580,
+        0
+      ],
+      "id": "bfd7a54d-76d3-47b1-8bee-18266cb63912",
+      "name": "Gmail",
+      "webhookId": "75f25621-023f-43d6-9e96-b487065887e3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pzvNbgpyNQ9uSokr",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0e8d07ec-ed80-4c86-a436-6bd9d65fbb7d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fb5372a820b0206cb902b4b3758673226a62dfe8a15a9d09fe20df8bf9e293a5"
+  },
+  "id": "hcf91MDDgznOYq3p",
+  "tags": []
+}

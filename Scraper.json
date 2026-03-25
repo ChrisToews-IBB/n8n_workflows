@@ -1,0 +1,209 @@
+{
+  "name": "Scraper",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "27e7c0a8-be4c-43b7-b0a1-5261168f80bf",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"urls\": [\n    \"https://services.swoppen.com/de/hilfe/einleitung/*\"\n  ],\n  \"prompt\": \"Extract all information you can get for my n8n Ai-Agent. Information should include:\\n- FAQs\\n- All information about Soferu\\n- Useful information for Customer Support\",\n  \"schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"faqs\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"question\": {\n              \"type\": \"string\"\n            },\n            \"answer\": {\n              \"type\": \"string\"\n            }\n          },\n          \"required\": [\n            \"question\",\n            \"answer\"\n          ]\n        }\n      },\n      \"customer_support\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"contact_number\": {\n            \"type\": \"string\"\n          },\n          \"email\": {\n            \"type\": \"string\"\n          },\n          \"working_hours\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"contact_number\",\n          \"email\",\n          \"working_hours\"\n        ]\n      },\n      \"additional_information\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"title\": {\n              \"type\": \"string\"\n            },\n            \"content\": {\n              \"type\": \"string\"\n            }\n          },\n          \"required\": [\n            \"title\",\n            \"content\"\n          ]\n        }\n      }\n    },\n    \"required\": [\n      \"faqs\",\n      \"customer_support\",\n      \"additional_information\"\n    ]\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "2d26652d-7ed7-4fa2-8f19-1fc9e470cdd7",
+      "name": "Extract",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "u7hI6n6n6mvTKspj",
+          "name": "Firecrawl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.firecrawl.dev/v1/extract/{{ $('Extract').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "84ee5db0-b5a8-4d5b-9cda-3071ecb1c951",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "u7hI6n6n6mvTKspj",
+          "name": "Firecrawl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "99aa409f-9c18-4017-af96-bd9fbe3bb671",
+              "leftValue": "={{ $json.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "64eab0cd-c636-4193-a51d-6c5919c74e8e",
+      "name": "If",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        980,
+        100
+      ],
+      "id": "ea81cb34-cac8-4091-83a7-d92fb5f59531",
+      "name": "Wait",
+      "webhookId": "64c16256-b170-464a-86a4-a23d85906957"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f705e6e-7e22-4cb7-b856-d655aa02f1b5",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        980,
+        -220
+      ],
+      "id": "87820a6c-d94c-4a8c-8df6-63a1499d90d9",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "81a284e7-822c-4519-9693-75482e378420",
+  "meta": {
+    "instanceId": "fb5372a820b0206cb902b4b3758673226a62dfe8a15a9d09fe20df8bf9e293a5"
+  },
+  "id": "Nga9JPVp3X0E8wOS",
+  "tags": []
+}

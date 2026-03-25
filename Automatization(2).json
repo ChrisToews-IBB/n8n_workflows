@@ -1,0 +1,742 @@
+{
+  "name": "Swoppen Automatization",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4c328045-e47a-4a00-9a3a-7f1796661ad6",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "LsqxyddefKzNxiH5",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"customer_Q\": {\n\t\t\t\"type\": \"boolean\"\n\t\t},\n\t\t\"reasoning\": {\n\t\t\t\"type\": \"string\"\n        },\"lead_name\": {\n          \"type\": \"string\"\n\t\t},\n        \"lead_company\": {\n          \"type\": \"string\"\n        }\n      \n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        620,
+        220
+      ],
+      "id": "d68b8144-ea32-4286-a15c-de904ba56783",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cc0ddd3c-9bb2-4ded-b6e8-ea94a5df2a46",
+              "leftValue": "={{ $json.output.properties.customer_Q }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        0
+      ],
+      "id": "8a9cf601-08a6-4e90-ada7-9734246b4897",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        140
+      ],
+      "id": "1089974a-b88f-4141-a1c2-98a37d4cd4a4",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appplKgWql2T8KC9s",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appplKgWql2T8KC9s"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbloAk6bMfhSeIG4r",
+          "mode": "list",
+          "cachedResultName": "Customer",
+          "cachedResultUrl": "https://airtable.com/appplKgWql2T8KC9s/tbloAk6bMfhSeIG4r"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.output.properties.lead_name.type }}",
+            "Email": "={{ $('Email Trigger (IMAP)').item.json.from }}",
+            "Company": "={{ $json.output.properties.lead_company.type }}",
+            "Reasoning": "={{ $json.output.properties.reasoning.type }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        -100
+      ],
+      "id": "1bfd9ea3-df14-42fe-b8cd-e15818a46c1d",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RcsRp2hYetewbq6q",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        180
+      ],
+      "id": "c2b89a09-5b79-4251-96b4-8e3494afc7c4",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2eQjV1uq585TWIny",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "search_customer_knowledge_base",
+        "description": "Use this to search for answers in the company’s customer support knowledge base"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        120
+      ],
+      "id": "f4a48da4-e6fc-4529-af07-04fb0f86dd51",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        280
+      ],
+      "id": "f606bc1e-8cf7-41f5-910b-892d8afe7369",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "JEm4QUInTUuanMZz",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-exp-03-07"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        420
+      ],
+      "id": "33d564ff-643d-4946-ae29-72dc549d7ed0",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2eQjV1uq585TWIny",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1480,
+        320
+      ],
+      "id": "f432c296-31e1-42ca-8443-a5b97f3d701e",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2eQjV1uq585TWIny",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Email Trigger (IMAP)').item.json.textPlain }}",
+        "options": {
+          "systemMessage": "=You have to act as an \"OpenAI Message Model\"\n\nYou are a professional and helpful AI email assistant working for Swoppen Systems GmbH.\nYour job is to read and respond to incoming customer emails of any kind, including:\n\n    Product inquiries\n\n    Technical support requests\n\n    Complaints\n\n    Feedback\n\n    General questions\n\nWhen writing replies, always:\n\n    Use a friendly, empathetic, and professional tone\n\n    Address the customer by name (if available)\n\n    Clearly answer all questions and resolve issues where possible\n\n    If necessary, ask for clarification in a polite way\n\n    If the issue needs escalation, kindly let the customer know and forward the case to the appropriate team\n\nYour responses should be:\n\n    Accurate and based on the content of the email\n\n    Concise, but complete\n\n    Written in the incoming language, written by the customer.\n\n    Reflective of our company values: helpfulness, transparency, and respect\n\nIf unsure, ask a follow-up question instead of guessing.\nOptional: Custom Instructions\n\nYou can also add:\n\n    “If the email includes a complaint, apologize sincerely and provide a solution or next steps.”\n\n    “Avoid giving legal or contractual advice.”\n\n    “Use short paragraphs and clear formatting for readability.”\n\nIf the email contains any technical questions, product-related issues, or specific customer inquiries that may be answered using internal documentation, use the search_customer_knowledge_base tool to find relevant information before replying!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1180,
+        -100
+      ],
+      "id": "b9f778e8-c122-4d94-a7ef-a35d81a14136",
+      "name": "Vector-Answer-Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Your role is to determine if an email is releated to a customer question or not.\n\nRespond with JSON object with the following fields:\n- customer_Q: which can be either true or false.\n- resoning: explain your answer.\n- lead_name: the name of the person as per the email body, leave blank if not a customer email.\n- lead_company: the company wanting to buy/ has a question, leave blank if not a customer email.\nThink carefully about your answer.\n\n{{ $json['Email Context'] }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        440,
+        0
+      ],
+      "id": "64566326-8fb2-48d6-a267-92b0e3b71778",
+      "name": "Determination Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2bf05624-a77f-474b-b7b8-5f9a9054bfcc",
+              "name": "=Email Context",
+              "value": "=Sender Email Adress:\n{{ $json.from }}\n\nEmail Subject:\n{{ $json.subject }}\n\nEmail Body:\n{{ $json.textPlain }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "d8b59d68-ecfb-423c-97f1-dc4b7d248df9",
+      "name": "Set Email Context"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bd49a944-844d-46b1-a5ac-d81e819b844b",
+              "name": "email",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1620,
+        -300
+      ],
+      "id": "ec18dd6e-b5e2-439e-a0bb-a164a402c705",
+      "name": "Set Email"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.data.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Approved",
+              "description": "The email has been reviewed and accepted as-is. The human explicitly or implicitly expresses approval, indicating that no changes are needed.\n\nExample phrases include:\n\n\"Sieht gut aus.\"\n\"Kannst du so weiterschicken.\"\n\"Genehmigt.\"\n\"Keine Änderungen nötig.\"\n\"Super.\""
+            },
+            {
+              "category": "Declined",
+              "description": "The email has been reviewed, but the human requests modifications before it is sent like tweaks, removing parts, etc. This could include suggested edits, rewording, or major revisions.\n\nExample phrases include:\n\n\"Hier müssen Änderungen vorgenommen werden.\"\n\"Zu ungenau.\"\n\"Kannst du was abändern bevor du es abschickst?\"\n\"Erwähne nicht dass wir das nicht können.\"\n\"Braucht paar Änderungen.\"\n\"Ich würde das nochmal überarbeiten.\""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        -300
+      ],
+      "id": "e195148f-63e2-4a99-9536-755c00f5c1f3",
+      "name": "Check Feedback"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        180
+      ],
+      "id": "9e001469-0c1b-4d22-b1a1-58ed327c4cf9",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2eQjV1uq585TWIny",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "fromEmail": "=creezehd1990@web.de",
+        "toEmail": "=toewschristian@web.de",
+        "subject": "=APPROVAL REQUIRED for New Lead:{{ $('Airtable').item.json.fields.Name }}",
+        "message": "=Please approve or decline the sending of this message generated by Jim, our AI Sales Agent.\n\nEmail: {{ $json.email }}",
+        "responseType": "freeText",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1800,
+        -300
+      ],
+      "id": "69e3ad17-caeb-4e98-80ea-40fad1eb6e26",
+      "name": "Get Feedback",
+      "webhookId": "dd3d0a7d-bac0-4710-abea-3cc468716ce9",
+      "credentials": {
+        "smtp": {
+          "id": "pM8ZC3Cl3bTGMiZT",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "creezehd1990@web.de",
+        "toEmail": "toewschristian@web.de",
+        "emailFormat": "both",
+        "text": "={{ $('Set Email').item.json.email }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2480,
+        -460
+      ],
+      "id": "1375e417-63c8-4499-846d-3904d1d10d27",
+      "name": "Send Email",
+      "webhookId": "9058353a-561c-466c-87ec-5fffe611fba9",
+      "credentials": {
+        "smtp": {
+          "id": "pM8ZC3Cl3bTGMiZT",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Email: {{ $('Set Email').item.json.email }}\n\nFeedback from human: {{ $json.data.text }}",
+        "options": {
+          "systemMessage": "=You are an expert email writer. Your job is to take an incoming email and revise it based on the feedback the human submitted.\n\n## Rules\nSign off emails as Jim, Dunder AI\nHere is the current date/time: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        2380,
+        -200
+      ],
+      "id": "b14df86a-1b7f-423f-922e-1703b5113afa",
+      "name": "Revision Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        220
+      ],
+      "id": "c353191c-f253-45cc-aa2d-2d4793cf3c9c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2eQjV1uq585TWIny",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Email Trigger (IMAP)": [
+      {
+        "json": {
+          "textHtml": "<div dir=\"ltr\">Ich wÃ¼rde gerne wissen wie ich das Kassenbuch einrichte. Dies sollte bei Ihnen als Dokument vorliegen nicht wahr?</div>\r\n",
+          "textPlain": "Ich wÃ¼rde gerne wissen wie ich das Kassenbuch einrichte. Dies sollte bei\r\nIhnen als Dokument vorliegen nicht wahr?\r\n",
+          "metadata": {
+            "return-path": "<toews9@googlemail.com>",
+            "authentication-results": " web.de; dkim=pass header.i=@googlemail.com",
+            "received": "from mail-pl1-f174.google.com ([209.85.214.174]) by mx-ha.web.de (mxweb005 [212.227.15.17]) with ESMTPS (Nemesis) id 1MV3as-1tcf9S0HH4-00VqoJ for <creezehd1990@web.de>; Tue, 15 Apr 2025 10:44:24 +0200",
+            "dkim-signature": "v=1; a=rsa-sha256; c=relaxed/relaxed;        d=googlemail.com; s=20230601; t=1744706662; x=1745311462; darn=web.de;        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject         :date:message-id:reply-to;        bh=M9o0lgAQUScMpF3UVY2RbhNuUtxinphtN3KDW37t5xw=;        b=ByH/58srYn7l4iIlKCB8+ywIG/3Y1WjRi5irkSJKET9AtWXkKqXYrcnfsy84CsD+1w         jcrNhDmecHS48ZeuM/cXnJfEAQ/G+Nw1qoY5M02EJprqWx+cVBDOpivzrsqweu1J7R2F         nSHasjvLqkp99TbeGgzFhf9E5V2O/xL8Z2qPB97a1LDkZ0w5s0SKL1TfDKBn9vvwrn9h         pnmPq/z0pjjuYAcYlTEpAI0SBvTvo4WTpyqQ7u34yV+oeRwq3h+Ton4Yohn48pMfS6sM         1/FyaAcM0WD0L4Q26LUfgWi0RWjz8Sxlr362vCZTR5eBWdMOkT3CBuceeAhbLUsLPQZU         7ljQ==",
+            "x-google-dkim-signature": "v=1; a=rsa-sha256; c=relaxed/relaxed;        d=1e100.net; s=20230601; t=1744706662; x=1745311462;        h=to:subject:message-id:date:from:mime-version:x-gm-message-state         :from:to:cc:subject:date:message-id:reply-to;        bh=M9o0lgAQUScMpF3UVY2RbhNuUtxinphtN3KDW37t5xw=;        b=rE6dsm1IM9byypfTxjdoeZN5etSzjohmdxR3vxGREaRYzjMLoEpED+tUWGPcB14oaA         XyVA4CMSvd0cRi+kOX+/wlrPDPRfD918tNxiUGTGaR4A3ardc6eYirbIjhiro9+Jf/VZ         EyAl/DUZOxwx6CGHc4LFWwyx/H5mWQYpIR8MlngMXmS7D1XN/2KPMQfnwd8SCpORf2B+         zsajl4MyxNUBsBioXJrQnBOVkVHrz/9xXJ3Uoirtab9nQlmkOGhlSv9b1Gh/PvbpH9PB         ebJAJT74D8wu17NVDmF3W1gNBtMFHCZHaUP0RfJ2pKaTKDczB5YJnrdTyMxUxTc9gttw         FE7A==",
+            "x-gm-message-state": "AOJu0YwAAdBUMpJCTChyfIU7jRmDFQwNOvf663COxCH4Dj15tn7yG7CE\ttuiQIGlRyXcUO6vDzCevKFcDmy3wWSXGkU5QlsWl1BOHbn+KOCHg1ivYoL+CatXTYpJmqXFvYNq\tVvroOs+vXvxILxq819mku4THBZmjMOCtA",
+            "x-gm-gg": "ASbGncuJ3qdohtHmTe7SZosFqLlKscEXlLJcsTJDOG+BkzHUg2JIcvkc/btys47Njhd\t65uPu2s6+HJpG3+GiXs9b6qx4LSlhydJn5GTmjyO3wrUyX+81ePolSfvJNWKm4su/KSSPsdlrhN\tqD7d9dKOhipymgHGGn4slFig==",
+            "x-google-smtp-source": "AGHT+IHaBAwtP0RmRqRfM9xIYP+8pF99Z2k3G+PY0wNQtRqDMLQFkvnBH3JqnXfp6LXeyVtU0lxhQzuDTWyzdtilsWE=",
+            "x-received": "by 2002:a17:90b:2c8e:b0:2f4:432d:250d with SMTP id 98e67ed59e1d1-3082364bfcamr21616638a91.21.1744706662292; Tue, 15 Apr 2025 01:44:22 -0700 (PDT)",
+            "mime-version": "1.0",
+            "x-gm-features": "ATxdqUHux8cgDxdgh2sbCjE9WcfA3RX_2_wXVturWLtNtkrE712Sba0np3N6nTE",
+            "message-id": "<CACW-G+gbZP4xiPYrpg5LqmTWS2Nzq=Z-=-tP4ipZ+4wnPr6_yg@mail.gmail.com>",
+            "content-type": "multipart/alternative; boundary=\"000000000000d7e6720632cd2c95\"",
+            "envelope-to": "<creezehd1990@web.de>",
+            "ui-inboundreport": "unknown:5;M01:P0:N36vp4cev+c=;vnwpkLbX3U3Id/E5Cll6x6gaKkze BXKj52t9ptkMNzVq5ERMj/dU+TBmHE6jGaIhv7d0ZzEDY/hy1Fy7//+6pJnOWU+P9lE+nAT6o 3hNBckDRjnkUQIYoYYP6MYgO8jGx2eblit9P7aIC90exNQ1VA5H1kYcvwz9aFIKoGGOL9tOro 1/1q7uGfHJ514YzH+dyRsDHIEaPzhaHnzRXFjSrVI9JrSE14xJT8sVxx7525k9sAtEA3a3dEf AU18xGQmEV5wDHVadDSugB6zh3F6PYaUqlvhoZn9bbYNY6v+/5qwhvU/9LMESyuCmnaYGl+az LhfqJJiPfx9m09sWJuP1ZEphu457B2eVfQQhHxtF2tdMLkjh6ynzwsam4/0KTPYCliMq1X9bo HXSM9lvsIZ5r7HJaUwPkxmDHpXrKTB4kt8X0jOf2MQ3LK389s7FZR51gyo4DrIIR7MPsdY4Go SaOqLm59l2HNDcrnalaaeL9FMMXak8zsZ1XHgbr8LVK/NyMPK0byzZtMDfBcODlrogKRAOrj7 XX0MqDiIFAkynWdkWW7d9QDKwx10yF8dI3p9XzCyF44hjHEI2wwJnZkLOlcYNJ/ItTExEp56a LHOdIItR9TVVSZqXaGQzNQVY5RF6S1xYpVGwZYVo0eWsKLbcJ0NAISkx/HY7flyBdY+XRFfKO suQuOI6iOoDcL1MSADItkXXdocESKCFD5ugIQ7EbWa2hDZVA3ddfKnLw5wzRPXUHHfq7VlyaM UmeAkPAVpQvJuM9GrqsaQQ3P9dMaoBsSvk+Z4wk6hHl9VSQwp9CDcIemSISWmTZMEg6s98At4 xp+V6CaRoNtpQx0TyJpCRAaZWX2kGeGDVMH8ZQDD/qgYFVOG7vh243Sz5NQb6cqhh1U+o0qab jqUFYzVQF78OytdwYjbSaM8uVm/BX3JhQGlSIDJYGz8fyt5PjGlxyTTqXbYtnb/d3HZY4rUft 1DSC7VfeU2ocFbc6pZJ86ScLow3uI4rJqXOmvKuOaipAcVbhWJ7lcQZtK2g9xHU7bexd5ONcf 1eTubnHmQ/+oUbyHOplrcPT99pS3xCr+BSrjwKfM08frTydlXjaIs5WFKxl16GJLJDyP645gV Gge+yVNhXke1FEwMD1Rm3+hMFi/MU01TjWbaAfJ5PmB/f75gteQXJr9H7pVbGtcFCOBy5C6BB mBpatpw2xx8qeTHbLyId0SlwzpobO+4k4izBIlqBkO6cHCvcvKopLBXHoNhuctB1CK/Y74B6D 0HLX1bYkD0RWHzy3/3jGPt2vMeOd5QDlSAEh1gIBXrRojxkwH5+UpGc5IULl8+U8OnG0ExUGX l9hRrKCBeSHgv/nqV7Ff2vyKenIMHBv4cijjaRS9EQ9K0MzFegrg60EsOqeBMgpp/xoeh4n10 ukD4ZC5LbACYnzJLOj7U2eHMJnClaco3isoLK9BX7SQWF9rGq4kkGPmWVhbvxCQHjVHag40lD 2MVxBuh/mSykWuUf/JX8Mb65ezOaTRv7A38NJXkB4qTuwBV8eiKinxhlgbS1YKmgL+E+Tr7Cd 9OeB6XsdnT1tv07tb9P9ppwyiroqkyd7+fmhJyA0OygG8TwSYGtbR6l5N9J+tOmKGahhf/e85 QO4U33YdsuMyYEDBtpRcaaztT7RSUtepC5nk4hJdKJwmgrF03wJsiZ2gjrEIGV9dAoI2ZJjjW cf1xo/VLXgUwk9PsUBd5MaF7u8q9590nq43V4UgvUGtUNTgZ6Fnz/jD4eWYjgVRavdNFGaGT8 OAuEi3I6sJe3ghKRdUrNo4dJ2oUFKGI4/MPT68qBpGCFM8xPCLGCetXZ4nbNBYBPY6/JsPyVy bsrO3xF7f79pSrdIA7d/BcgAmwPg0MXeIoxSwpjRcRPH5iRpTE5yGcjhYaDCsjRs2UqZ743xc 5t94roj+kM130zhOQ9Jks8Ke9Lg9PpyhHf+4CX8FX9GAyyxYjAjpWrE99fWNmMU99JV19PX86 K0FkOV4VtuWvtZizvCbgIp5LPKGtpXXsdmn0au1K2FFTPL6kQ4atRoOQFCQXwzCA48q+XC95A 3MqrzNpGDNUnkk1BABiL1WzVs9rjeoUjFC4REGGBFWmrKdHlp5thy2iAC86F82lQePvyOeqxO lckKUZHxrtpbjfMXw4W8HCJEhztrJA2+TcsGVnTukcTXqfCpg7LyntlrF29TP4tesv4hht8mV 5s3EO97EqadniONfUrkYSo3qnUQMnxMDHy+pbtwZkfZF73Q/yaeLNz8j8xtjEMDS7anYRUNZ2 3sA5owx8Nm1k1dydwESakHFRtURMR/b+ZKPxV3CfLJdl8bYewPD2esd3aRTX5xZidCSN89Ept yPdrJXmQmNadP7hqWw/3wa+bMD+ehMoeFX1wtvJ8d3GxlIIJuH4ruKWVMDsySPxM9JqQT9iJb NUcdq5CJnHrkcZPBgohSSQ26VW8Yn7OwZ5d0D61pfUKoN5ePIxL6JepvuDifNSxzg77yr25oI bnGljRsgrWkWJ7ldyD8/HYzZum0WqX3RoN7idI1/4hlc0Akv5R1O4vScQ7yRwIEfF7b6TI5IQ 4k1r50qLfyvbUKPmfxGSm7iSBxxBBfozrhkukU8BaL+QNv8md0J+lvuYv39ZH7CR3wRrWHlwp PUzDGVEcp38kOMzezy97S/+AGc+sj3MNSoOlHMB2j2PK8Ubwq4KjUfxYnJxpSRQbVXfQzJtMj RXhu/PoBjaRGrmB+zGHewj6f0FCfYiNO9nOvHjeHqPseg3WN7oCB03U9mqogKATV2G3CWvBpG vHcY/P7XLNtJbOBKdUCU/NyTxjtiv+3kuZ7gYm/eSsjNZ6EXoXMPpeChPNdK/zh/Z9NOFkGpb 034vBd2RGPLMhUp1zdCtFqG/fYDZYq0JjChy/LeBdfmVTIa+0TVTOPFIND9hzNf4GgK53c98B Z99v7n94RVeTbNGJVwVl6avLg5tQOt60eEqhqadlK7+/xCy/7AelohD8JQAGjMYXhq6Z5iPY+ 3uiMOgf+Hti9zFb+mWEQjk/XONHK8eDOwzy/0jJSPZrOjrBh56+n8yr5RU2Sh+u2XgFa2wjgG Asm7KKutKY1MWCg70oCuOIEVzZc8H+Gfgag2HnIYaIPbCdDjwwba3Hw0IpkLAF5efUaJRm0v/ lpEnTxKxiFCklfC0Td3vxXnFopSHV5bLJC4TVrEPoXAYGHx4KbQKzVXBhTKpXJvnVSUglydzE kchCXI6mOGEIvCYY8rr/LNO3nMbhCfuhuDxIQ7guTAbcl3GxdlesnTyVLg+QroM1UqrcvoEtB K64eSiPUxeoIhsNh09gj860MihEQHHUOovWkK1WwkY6aHif5ubNcIYjHPIZceL7ImQiDXt3jv 6ABqi52vw1WOPas35wr2CfCIkX4BWFO7mNahG61kV1MXnc11g5daBAkom0h4aTkiOiCq3QkS2 fU506JYBOlUgZ7PV7dgmZR5aZzQP5+VrYAZkzk+cBevi/vGBKFLNo7mdIJJCsw0LlWtFlsImm H3/Mxiuwv+O0L0b5kNs9wfWU0ULsUzAtAjSJpehVRZe2iXQSRxl6a9Z3wcui7Jh2ZJq+2wqta XGPlihczOou07IJGrDKeB9CeI1gAtO0JOpeTtB4oGj7cYyOrGY508LBPaOOrFuFflkIUcYaq9 tuAZBa0xr1/fhsAs+EHLbdrF6s/FFQQJ+Yfkq3TtBXpNs220gUmVnNRFWrcMgGbzNL5ojvfZC TKBPD8P19euwvdgQXa1Z57Ialo3xcK/EcMhkz0YUAfgEyAPi5b83sfsblxJQD//2kYQ8cIiCx 0a2jcxa3/rS2oaaK4XstmV6bdd1vficp0DR7R9ruNPbcf+P+5cYy7de2ZehG7/rJAawexjYUM 4aj0SJW9DO5y+A419EEw3/8tJNrSqHruwosx9K3DnmtuFYQhpBLlGZ8kRoVdgd6oMj90t4mTJ oWr/+uP/f+b/umwzcTegBobAgkO7ML02QkyoVgq888FkPUtKPJEFO0dEOir002CAc5XFOJatS gcNX7tOhjAiQ1YhBKz1R02H4WfhkM98upEPxSSmE+2BESLPYiMugqCw5NUG6xOgDeUtaPp2hG 4GWPPVvDZIgqM8e4+/TOY10uKwWrwXQlwSIde/lxomiNMFF1ItogEl9pJTnv8aUOjqoVXaUFz O/z2V1YVckL8F8nLLrjTFwQplrlbCtRrH9nlEn88iNGB4Wp3Y52NqEg/Y6jVwwdaRP0CpFY25 VoxuGOTOgsHLZ9j2wMaqqsf9h5dO0do4VrvOV5D83lf7Jj+LodNNc7POgG5XudUV6943Zh4Ku Y1kSUBi711wnBeBwBTozDUa/Fjaqs/ecRhUNFq5Y3l6G5TNbPub4iR3LcrAtGDPebwz3r6G3M l5r1E2axwlmDc8Y+poOjYbgch+xH7sdp4WHXueUj66Y0qKdAJakya7XoR4SonFrKoKvh99HA1 ZEkT6FRXCGx685/IjMKpOTglohr+E1Rv19ujlWyK0kQfTtnUmxMwH59EVq+nkalA4VlfGRGvM evlSTId4HtFJ76oiIQBevKDhWfpeJfKrjdp8Ndn0XXpcL6vpklA96A/E8qIlKQMkd+wZ1adYD EFR4YIU08yibExDgjvEtIWDlfLkxIHpqOzsyC6fWVygHW47Lhch5jkDvltgIMOarffvBWEcYg B7d7S8OVnWvGPgFNq6IO3/9qfkdWQWcrHi0SuoqGGWTsivOC3WDTofdgxIfRPGmLZhOdgLMi8 qHdgpsWR7/47OM5XcDmhteyTE8EhIIEI9njtmql7fIYxtlouJjF3mP356qI7MH8usvFnWTjru 5kA1T9dJxbdLtIK52oylt+F/m0uj4pt4KGlXYzwIy5fjdnpc00XGLwOS6JxdgoNztyIHIohu7 dvdMDfcLg9tDRnpXJXA+jAfeIOZV1p7wHHzigm72QkjqTZZTTbra6bp47Amhy7LraHQeLhFIH ppo3AZW5g5X4bdka/o4dlYaEaMGYDcA6gotnsxYRD+Exm73HiSe/XLr5dj4D9HoHTqevXLZsf PdpOVMuvP+NJJgQA8Fmx5Ls9bNEopPMjWJ8ZuIai2jhrSvWScwW+jW9Xw0rPIZJ8skJG4UDC2 VCfdBaZCXBJrSzu20rsgVhZuOIe/KpSWsBUd/PRymHbuu4Ye5ZtEJn6yrVt9mMvN7r7rmp39j Yfnf4dO9aLSx9/JyPLOwhmBlLJ8hI+k0exllfMvLlNEzQcCkg67w3c+pg7vxusDVxOtaLQxiY +sFh6GWY5AEv84OdgLr9BXQ5vXxyI6il6kN2HAqMbHxXMNcXdJr29olnh9iUrOVLFygDxfFx1 Bs0ju2QkMCQjW0xJtikmFeRNFC2XkVRbOtC6nd/soMI7FoW0LdtOFWknE1OBZSjUhZKJvqwQY CBHG/g0s1D732s/fsXfSjt6YNWiLaIp8p4kciOmn7uEdF2S7CH7XZhzvzU/asGiaNGXvkImWx XneADi7thkacYK0Z2M2KgV/xfcUpK7TLYNYeO8YolTb0K9TYSVqXbx91KjGfKZ5sM899wW+Ir D88JpGr3VYsAnts2UY9G4JFn/DvNE3TyaOGY9pKgrrRDBh+FyDoP0yo1xmD+GJqjhyNrbq+av J7quGxyx30/TgnNt/EestJovQ5IFL4a2Dc6GdcTAThAyRMSqzBl4sQrcVkJZHraIRxmH0NBi8 p+IV/WhVwcBLz4JH4K+xPt8FxQXotoH6Yc1vANJ+C5ITcnAHQAA7MmkA+II6cW8dgvLq4PsaJ YbRFp8CoqCY2BaP22RIjswA4vBsokAT95CejmOuhSNenoAK+tIS646hFpVJgFz/K2Cgg8rYbK EypwUY7JTpXv9ognq0DevXvlOIftN9ayHVaWtX5UJxZX33azaHYQc2vNKFIu6WPhIBip7fknn rHI/kLKWuE03vGt/d57luvzRM/3we3LEmcmsH+OpVUQcJy0hmuuIsXFGA0MjkrevqF7agEk+d ubhHGCOywLNlxcK5GqWMkY1y2cSAapQRhSJ4EW+oyTR+Z8bF1Nj+TlgztwqVwqTu1lfoN7yQX W43fO2uL26yp9o2QvFsHuDes9H66LS9B78C0wdyXsRd7IaFo3XuZVpuFZTWHItmgI43Cf/yNR p4LIvfgCD6vsK7iP/m8DyTpgRb8BQE4btmEpxuVp1WkZC2AtWXp8FuiLPE2ewDAJLdzJQpCvH RwQOZ6gqdFKe3soZsIYMEU//hGzWh4itHqidXQNlqU9T1P8IwEp9zm29w4yYsisVRtw2xdDYY LAH7KzDUSZdngdUtk0LpQr4r957UQIEx5SNXUFxnuf/CJDRF+cVBwuzyg3j4EW3/o++8NcZFo BIfqogNGLcFQBtWcghNgT6KEqo8LDz61BdTg5lIuyLALmPUlm54PLfpURjXwr55Tp2irRMSP9 yIlIuZLIK271e3PcqJFdpnaV4sHkXeb61akJNclc7+JISB2utzXFj4+RsOYLzSUSYlprrik/+ acfPHRRA5e3uZsTlOI0vcDVZ+q23Gz4+hEHklCtn3BNMpSj9G4E+tE1aq8I6BoV+NzvzzhuQN MvV6xcGqi5YhlnRtMwX7Ydt81B0hU3wfTAgv0frgC1oiRONyXVXOO3x6cqh9BDCzwrdtRi3L4 FRqNA87l46/oyjVy8p5t3V6QI+Z3WQq8NIVq1LHIc12EuJ3XBamUYZG/9m/XnFw61DaGmXKuO zmVHlItw4bD7gbck08RlFvHkVfvlaBnrvLeNNmm3J2VsbS3iqADviGBU8IAqiC3q8qXX0Nz9+ 2IlpMx0hEfg6pvQc9eTS27JVNQyyDW/igKRKSIDGMFbavohBkcyJGULs6zBhtJiZ0VqYP5uur jLY18Hfmrp7orTD4ViATYorNd3e7TZkpPqaaSOtyPKYaNCvfL66GKfzEtwS9ciDlRH922MHKu 8PQ6xyZ+yQJzZB1C+TSpR1SUYVSRjeob1PhbuRtROm1xmwLcrUAwv39h1mvBkCPvoqECeqbJw UosxDidgrTMbNJtFgGORrW42F6FwK+BzGLQS/w4C79AvJmGOHx8jtCbyEYurE33xaWEWR50dx A9R2Wa8phWCDlpyKva52SB1xRbsj+8FL0kLTWaJB2RVB79BWu0l0WwCbwvti2ekPDFgsoY7ws 8m+CEwWicbwrjfl/cIeoYG/m5d0u08Nfb/lM6aZmPZ/CrmgUchmZUgfV6DvIsqTammaDCRfHp 9wOImVYRNngJKVevFLJNwg03UyBVKE6pshOotajDR2UZXMK42MuVuusgKKYznVtvKaZOC0SHJ afVG6YvW70wiqNXmw2JwgR4Ez3bIrr3W7gTI5veTLxxMJMTPIzaVREzGLPgkX1eH/0FPhKwjz aMjlguHr2IMfqIjQQvTeml0fteXSyiW+BTNTBIokDyD2ysczz8NQfhzNechKD0h8TRuFP3tX+ CM3ZK11JpxsncVZ83k+Bi14zph5XzpP9Z1+3kqhP9omEtGdK2I4swXSEn3VP5beazpld0jizU RovAY6BPKzB0TzN3CfmbY9scFe1aZeih/oISXweLqg5kBq0XM/cPNc+QGV2EDhP7wH6zOkD9+ PVMMVP0WS9deyE836vOY4AqcJxpf/wY9EtDV2wx/TuK3llaH3yePYL79GA5CMV41ftnvxvehD kq+6/3z9xDB0GRf5Q9gESfst/NCCpOsRlbpArBc2b7EWzDcHpwznieZ2WpHa+mGlRZ5IG3HoZ 8RxPAXPJ3K/tNRTYkj4ixmjqHI2pXKUI6aiKLzP4ego213YcJseBZCmAX96cSlFg=="
+          },
+          "from": "Christian Toews <toews9@googlemail.com>",
+          "date": "Tue, 15 Apr 2025 10:43:57 +0200",
+          "subject": "Kundenanfrage",
+          "to": "creezehd1990@web.de"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Set Email Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Determination Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Vector-Answer-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector-Answer-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Revision Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Vector-Answer-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determination Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Email Context": {
+      "main": [
+        [
+          {
+            "node": "Determination Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector-Answer-Agent": {
+      "main": [
+        [
+          {
+            "node": "Set Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Email": {
+      "main": [
+        [
+          {
+            "node": "Get Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Check Feedback",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Feedback": {
+      "main": [
+        [
+          {
+            "node": "Check Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Feedback": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Revision Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revision Agent": {
+      "main": [
+        [
+          {
+            "node": "Set Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Determination Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f697d3f3-3cde-4549-a279-40be189ae0d1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fb5372a820b0206cb902b4b3758673226a62dfe8a15a9d09fe20df8bf9e293a5"
+  },
+  "id": "dy6QtZdAwPDjF0UH",
+  "tags": []
+}
