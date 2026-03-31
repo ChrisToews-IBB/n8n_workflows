@@ -51,7 +51,7 @@ Extrahiert strukturierte Daten (FAQs, Kontaktinfos, Support-Inhalte) von einer W
 
 ---
 
-### 4. Swoppen Automatisierung (`Automatization_2_.json`)
+### 4. Email Automatisierung (`Automatization_2_.json`)
 
 Vollautomatische Kundenanfragen-Pipeline per E-Mail mit KI-Qualitätsprüfung vor dem Versand.
 
